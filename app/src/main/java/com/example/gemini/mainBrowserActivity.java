@@ -1,13 +1,21 @@
 package com.example.gemini;
 
+import android.app.DownloadManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.webkit.DownloadListener;
+import android.webkit.URLUtil;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -30,8 +38,8 @@ import java.net.URLEncoder;
 public class mainBrowserActivity extends AppCompatActivity {
 
     WebView webView;
-    TextInputEditText searchEditText;
-    ImageButton imageButton;
+    EditText searchEditText;
+    ImageButton homeButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,14 +52,42 @@ public class mainBrowserActivity extends AppCompatActivity {
         });
         webView = findViewById(R.id.webview);
         searchEditText=findViewById(R.id.searchEditText);
-        imageButton=findViewById(R.id.home);
+        homeButton=findViewById(R.id.home);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                // Load URL within the WebView
+
                 view.loadUrl(request.getUrl().toString());
                 return true;
+            }
+        });
+        webView.setDownloadListener(new DownloadListener() {
+            @Override
+            public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
+                // Start download
+                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+                request.setMimeType(mimetype);
+                request.addRequestHeader("User-Agent", userAgent);
+                request.setTitle(URLUtil.guessFileName(url, contentDisposition, mimetype));
+                request.setDescription("Downloading file...");
+                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, URLUtil.guessFileName(url, contentDisposition, mimetype));
+
+                DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+                dm.enqueue(request);
+                IntentFilter filter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    registerReceiver(new DownloadReceiver(), filter, Context.RECEIVER_NOT_EXPORTED);
+                }else{
+                    registerReceiver(new DownloadReceiver(), filter);
+                }
+                Toast.makeText(mainBrowserActivity.this, "Downloading file...", Toast.LENGTH_SHORT).show();
+            }
+        });
+        findViewById(R.id.downloadButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(mainBrowserActivity.this,DownloadProgressActivity.class));
             }
         });
         Intent intent=getIntent();
@@ -59,26 +95,18 @@ public class mainBrowserActivity extends AppCompatActivity {
         if(browsContent!=null){
             performSearch(browsContent);
         }
-        imageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(mainBrowserActivity.this,BrowserActivity.class));
-            }
-        });
-        searchEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_SEARCH ||
-                        (event != null || event.getKeyCode() == KeyEvent.KEYCODE_ENTER ||  event.getAction() == KeyEvent.ACTION_DOWN)) {
-                    Toast.makeText(mainBrowserActivity.this,"working",3000).show();
-                    Log.d("EditorActionListener", "Performing search");
-                    searchEditText.clearFocus();
-                    performSearch(searchEditText.getText().toString());
+        homeButton.setOnClickListener(v -> startActivity(new Intent(mainBrowserActivity.this,BrowserActivity.class)));
+        searchEditText.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH ||
+                    (event != null || event.getKeyCode() == KeyEvent.KEYCODE_ENTER ||  event.getAction() == KeyEvent.ACTION_DOWN)) {
+                Toast.makeText(mainBrowserActivity.this,"working",3000).show();
+                Log.d("EditorActionListener", "Performing search");
+                searchEditText.clearFocus();
+                performSearch(searchEditText.getText().toString());
 
-                    return true;
-                }
-                return false;
+                return true;
             }
+            return false;
         });
 
 

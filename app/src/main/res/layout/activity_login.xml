@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/shape1"
+    android:background="@drawable/main_gemini_draw"
     android:orientation="vertical"
     tools:context=".Login">
     <LinearLayout
@@ -17,9 +17,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="Welcome Back"
-            android:textColor="@color/black"
+            android:textColor="#FFFCFF"
             android:gravity="center"
-            android:textSize="70sp"/>
+            android:paddingTop="40dp"
+            android:textSize="50sp"/>
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"

@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    android:background="@drawable/geminishape"
+    android:background="@drawable/main_gemini_draw"
     android:id="@+id/drawarLayout"
     tools:context=".MainActivity">
     <androidx.appcompat.widget.LinearLayoutCompat
@@ -40,7 +40,7 @@
                     android:layout_weight="1"
                     android:textStyle="bold"
                     android:fontFamily="cursive"
-                    android:textColor="#E8DDEA"
+                    android:textColor="#FF0000"
                     android:textSize="@dimen/_40sdp"
                     android:gravity="center"
                     />
@@ -76,6 +76,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/_10sdp"
                         android:text="Hello Sir\nHow can I help you today?"
+                        android:textColor="@color/black"
                         android:textSize="@dimen/_30sdp"/>
                 </androidx.appcompat.widget.LinearLayoutCompat>
                 <HorizontalScrollView
@@ -198,6 +199,7 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="match_parent"
                                     android:id="@+id/sendMsg"
+                                    android:padding="5dp"
                                     android:src="@drawable/sendui"
                                     android:scaleType="centerInside"
                                     android:background="@android:color/transparent"/>
